@@ -1,0 +1,180 @@
+# Comment out the probes you don't need
+# CAREFUL: yaml is super sensitive to spaces - don't use tabs
+
+# Simulation parameters
+sim_params:
+    sim_name: 'AbacusSummit_base_c000_ph000'                                 # which simulation 
+    sim_dir: /global/cfs/projectdirs/desi/cosmosim/Abacus/
+    output_dir: '/pscratch/sd/s/sihany/2ndgen'          # where to output galaxy mocks
+    subsample_dir: '/pscratch/sd/s/sihany/summit_subsamples_cleaned_desi/'                 # where to output subsample datasubsample data
+    z_mock: 0.8                                                              # which redshift slice
+    cleaned_halos: True                                                     # load cleaned halos?
+prepare_sim:
+    Nparallel_load: 5 # best for cori haswell node  
+
+# HOD parameters
+HOD_params:
+    use_particles: True
+    want_ranks: True               # want to implement satellite profile flexiblities?
+    want_AB: False                  
+    density_sigma: 3               # scale radius in Mpc / h for local density calculation
+    tracer_flags:                  # which tracer do we want?
+        LRG: True 
+        ELG: False
+        QSO: False
+    want_rsd: False                 # want RSD? 
+    write_to_disk: True
+
+    # parameters I found on marvin
+    LRG_params:
+        logM_cut: 12.64
+        logM1: 13.71
+        sigma: 0.09
+        alpha: 1.18
+        kappa: 0.6
+        alpha_c: 0.19
+        alpha_s: 0.95
+        s: 0
+        s_v: 0
+        s_p: 0
+        s_r: 0
+        Acent: 0
+        Asat: 0
+        Bcent: 0
+        Bsat: 0
+        ic: 1.0
+
+#     # parameters for setting up the HOD of ELGs
+#     ELG_params:
+#         p_max: 0.53
+#         Q: 10.
+#         logM_cut: 12.3
+#         kappa: 1.
+#         sigma: 0.58
+#         logM1: 13.53
+#         alpha: 0.9
+#         gamma: 4.12
+#         A_s: 1.
+#         alpha_c: 0
+#         alpha_s: 1
+#         s: 0
+#         s_v: 0
+#         s_p: 0
+#         s_r: 0
+#         Acent: 0
+#         Asat: 0
+#         Bcent: 0
+#         Bsat: 0
+
+#     # parameters for setting up the HOD of ELGs
+#     QSO_params:
+#         p_max: 0.33
+#         logM_cut: 12.21
+#         kappa: 1.0
+#         sigma: 0.56
+#         logM1: 13.94
+#         alpha: 0.4
+#         A_s: 1.
+#         alpha_c: 0
+#         alpha_s: 1
+#         s: 0
+#         s_v: 0
+#         s_p: 0
+#         s_r: 0
+#         Acent: 0
+#         Asat: 0
+#         Bcent: 0
+#         Bsat: 0
+
+# coarse bins
+# clustering_params:
+# #    power_type: 'wp'
+#     clustering_type: 'xirppi' # 'xirppi'
+#     bin_params:
+#         logmin: -1.5
+#         logmax: 1.477
+#         nbins: 15
+#     pimax: 30
+#     pi_bin_size: 3
+clustering_params:
+#    power_type: 'wp'
+    clustering_type: 'xirppi' # 'xirppi'
+    bin_params:
+        logmin: -0.83333333
+        logmax: 1.5
+        nbins: 14
+    pimax: 32
+    pi_bin_size: 4
+
+# ===========================================================================================
+# The following dictionaries are for using the provided emcee/likelihood templates. They 
+# are not needed for using the AbacusHOD class and running HODs. 
+
+# parameters that indicate where the observed data that you would like to fit live. 
+data_params:
+    tracer_density_mean:
+        LRG: 0.0005279848633248657 # 0.00037393927607799065 # 3.0
+    tracer_density_std:
+        LRG: 5.0e-5 # (mpc/h)^-3 ####### variable
+    tracer_combos:
+        LRG_LRG:    
+            # path2power: "/global/cfs/cdirs/desi/survey/catalogs/edav1/xi/sv3/rppi/xirppi_LRG_main_NScomb_0.6_0.8_default_angular_bitwise_FKP_log2_4_njack128_nran18_split20.txt"
+            path2power: "/global/cfs/cdirs/desi/users/arocher/data_desi_ELG/EDA/cosmo_diff/Abacus_c003/rppi/xirppi_LRG_main_NScomb_0.6_0.8_default_angular_bitwise_FKP_log2_4_njack128_nran18_split20.txt"
+            path2cov: "/global/homes/s/sihany/hodfits/data/mockcov_eda_xi_lrg_main_z0.8_velbias.npz" # "/global/cfs/cdirs/desi/survey/catalogs/SV3/LSS/fuji/LSScats/3/xi/rppi/allcounts_LRG_main_0.6_0.8_default_angular_bitwise_log_njack120.npy"        
+            rescale: False
+
+# parameters for optimizer
+optimize_params:
+    LRG:
+        logM_cut: [0, 12.3, 13.8]
+        logM1: [1, 13.0, 15.5]
+        sigma: [2, 0.0, 3.0] # change to log scale
+        alpha: [3, 0.3, 1.5]
+        kappa: [4, 0.1, 1.0]
+        alpha_c: [5, 0.0, 0.7]
+        alpha_s: [6, 0.5, 1.5]
+        Bcent: [7, -1, 1]
+        Bsat: [8, -1, 1]
+        s: [9, -1, 1]
+
+# configuration parameter for dynesty
+optimize_config_params:
+    path2output: /pscratch/sd/s/sihany/desi_mocks_fuji/chains
+    chainsPrefix: xi2d_edr1.1_lrg_main_z0.8_velbias_Bs_linsigma_norescale_c003 ####### variable
+    popsize: 2000
+    max_iter: 300000
+    nthread: 128
+    nworker: 1
+    rerun: 1
+    mockcov: True
+    # skipbins: 0
+    # collapse: False
+
+# params to be fit for dynesty
+dynesty_fit_params:
+    LRG:
+        logM_cut: [0, 12.6, 1, 12.0, 13.8]
+        logM1: [1, 13.6, 1, 12.5, 15.5]
+        sigma: [2, 0.5, 0.5, 0, 10] # change to log scale
+        alpha: [3, 1.2, 0.5, 0, 2]
+        kappa: [4, 0.3, 1.0, 0.0, 10.0]
+        alpha_c: [5, 0.19, 0.4, 0.0, 1.0]
+        alpha_s: [6, 0.88, 0.4, 0.0, 2.0]
+        # Bcent: [7, 0, 0.3, -1, 1]
+        # Bsat: [8, 0, 0.3, -1, 1]
+        # s: [9, 0, 0.3, -1, 1]
+        
+# configuration parameter for dynesty
+dynesty_config_params:
+    path2output: /pscratch/sd/s/sihany/desi_mocks_fuji/dynesty
+    chainsPrefix: xi2d_edrv1.1_lrg_main_z0.8_velbias_bestgaussian_nlive2000_edrcov_norescale
+    rerun: 0
+    nlive: 2000
+    bound: 'multi'
+    method: 'auto'
+    maxcall: 90000
+    dlogz: 0.01
+    rseed: 100
+    nthread: 128
+    mockcov: True
+
